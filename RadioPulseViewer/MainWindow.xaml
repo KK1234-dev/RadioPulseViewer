@@ -293,6 +293,10 @@
                             <Button Content="radikoで聴く" Click="OpenRadikoButton_Click" />
                             <Button Content="番組公式サイト" Click="OpenProgramSiteButton_Click" />
                             <Button Content="局公式番組表" Click="OpenStationScheduleButton_Click" />
+                            <Button Content="公式X投稿数"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    ToolTip="スクレイピングを行わず、公式X APIから投稿数だけを取得します。"
+                                    Click="OpenXPostCountWindowButton_Click" />
                             <Separator Width="10" Opacity="0" />
                             <Button Content="←" Width="42" Click="BrowserBackButton_Click" />
                             <Button Content="→" Width="42" Click="BrowserForwardButton_Click" />
