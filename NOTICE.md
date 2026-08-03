@@ -39,20 +39,39 @@ repository.
 No WebView2 binaries or runtime files are committed to this repository; they
 are obtained separately during package restore or runtime installation.
 
+## X API
+
+The optional post-count analysis feature calls the official X API v2 recent
+Post counts endpoint. It does not scrape Yahoo! JAPAN or X web pages and does
+not retrieve Post text, user profiles, images, or video.
+
+Use of the X API, Developer Platform, Bearer Token, returned aggregate counts,
+and any related service is governed by X's current terms, developer agreement,
+policies, access plan, pricing, technical specifications, and rate limits.
+These may change independently of this repository.
+
+- [X Developer Agreement and Policy](https://developer.x.com/en/developer-terms/agreement-and-policy)
+- [X API Post Counts](https://docs.x.com/x-api/posts/counts/introduction)
+- [Get count of recent Posts](https://docs.x.com/x-api/posts/get-count-of-recent-posts)
+
+No Bearer Token is included in the repository. Users must obtain their own
+credentials and confirm that their intended use is permitted. RadioPulseViewer
+does not bypass authentication, plan restrictions, rate limits, or other
+technical controls.
+
 ## External services and content
 
 RadioPulseViewer accesses or links to radiko, Yahoo! JAPAN real-time search,
-and broadcaster websites. Those services, their program information, and
-content displayed in WebView2 are governed by the respective providers' terms,
-privacy policies, availability, and technical specifications. They are not
-covered by the MIT License.
+X API, and broadcaster websites. Those services, their program information,
+and content displayed in WebView2 are governed by the respective providers'
+terms, privacy policies, availability, and technical specifications. They are
+not covered by the MIT License.
 
 - [radiko terms and policies](https://radiko.jp/rg/policy/dark-mode/)
 - [LY Corporation terms](https://www.lycorp.co.jp/ja/company/terms/)
 - [LY Corporation privacy policy](https://privacy.lycorp.co.jp/ja/)
 
 RadioPulseViewer and KK1234-dev are not affiliated with, sponsored by, or
-endorsed by Microsoft, radiko, LY Corporation, Yahoo! JAPAN, or any listed
-broadcaster. Company, service, station, and program names may be trademarks or
-other protected identifiers of their respective owners.
-
+endorsed by Microsoft, radiko, LY Corporation, Yahoo! JAPAN, X Corp., or any
+listed broadcaster. Company, service, station, and program names may be
+trademarks or other protected identifiers of their respective owners.
