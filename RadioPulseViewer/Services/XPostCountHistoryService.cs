@@ -72,7 +72,7 @@ public sealed class XPostCountHistoryService
 
     private static string Escape(string value)
     {
-        if (!value.ContainsAny([',', '"', '\r', '\n']))
+        if (value.IndexOfAny([',', '"', '\r', '\n']) < 0)
         {
             return value;
         }
