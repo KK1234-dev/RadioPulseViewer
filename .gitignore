@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET build output
+**/[Bb]in/
+**/[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+arm64/
+
+# WebView2 user-data directories contain browsing state, cookies, and caches.
+*.exe.WebView2/
+
+# Test and diagnostic output
+TestResults/
+*.log
+

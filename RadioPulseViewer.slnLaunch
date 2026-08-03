@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "RadioPulseViewer",
+    "Projects": [
+      {
+        "Path": "RadioPulseViewer\\RadioPulseViewer.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

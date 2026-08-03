@@ -1,0 +1,324 @@
+<Window x:Class="RadioPulseViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Title="RadioPulse Viewer - ラジオ番組・反響ビューア"
+        Width="1500"
+        Height="900"
+        MinWidth="1180"
+        MinHeight="720"
+        WindowStartupLocation="CenterScreen"
+        Background="#F4F6F8"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display"
+        Loaded="Window_Loaded"
+        Closed="Window_Closed">
+    <Window.Resources>
+        <SolidColorBrush x:Key="AccentBrush" Color="#175CD3" />
+        <SolidColorBrush x:Key="AccentLightBrush" Color="#EAF2FF" />
+        <SolidColorBrush x:Key="BorderBrush" Color="#D7DCE2" />
+        <SolidColorBrush x:Key="MutedTextBrush" Color="#667085" />
+
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style x:Key="ProgramButtonStyle" TargetType="Button">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="9" />
+            <Setter Property="Margin" Value="0,0,0,7" />
+            <Setter Property="ToolTip" Value="クリックするとYahoo!リアルタイム検索を表示します。" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsOnAir}" Value="True">
+                    <Setter Property="Background" Value="#FFF4E5" />
+                    <Setter Property="BorderBrush" Value="#F79009" />
+                </DataTrigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{StaticResource AccentLightBrush}" />
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="250" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="240" />
+                    <ColumnDefinition Width="18" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="放送局" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <ComboBox x:Name="StationFilterComboBox"
+                          Grid.Column="1"
+                          Height="32"
+                          SelectionChanged="StationFilterComboBox_SelectionChanged" />
+
+                <TextBlock Grid.Column="3" Text="番組検索" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBox x:Name="ProgramSearchTextBox"
+                         Grid.Column="4"
+                         Height="32"
+                         VerticalContentAlignment="Center"
+                         ToolTip="番組名・出演者・ハッシュタグで絞り込み"
+                         TextChanged="ProgramSearchTextBox_TextChanged" />
+
+                <StackPanel Grid.Column="6" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="PreviousWeekButton" Content="◀ 前週" Click="PreviousWeekButton_Click" />
+                    <Button x:Name="CurrentWeekButton" Content="今週" Click="CurrentWeekButton_Click" />
+                    <Button x:Name="NextWeekButton" Content="次週 ▶" Click="NextWeekButton_Click" />
+                    <Button x:Name="RefreshScheduleButton" Content="番組表更新" Click="RefreshScheduleButton_Click" />
+                </StackPanel>
+
+                <TextBlock x:Name="WeekRangeTextBlock"
+                           Grid.Column="7"
+                           Margin="14,0,0,0"
+                           VerticalAlignment="Center"
+                           FontSize="16"
+                           FontWeight="SemiBold" />
+
+                <Button Grid.Column="8"
+                        Content="選択局の公式番組表"
+                        Click="OpenSelectedStationScheduleButton_Click" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*" MinWidth="650" />
+                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="4*" MinWidth="450" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Margin="12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0" Margin="12,10,12,8">
+                        <TextBlock Text="週間番組表" FontSize="18" FontWeight="SemiBold" DockPanel.Dock="Left" />
+                        <TextBlock x:Name="CatalogNoticeTextBlock"
+                                   Foreground="{StaticResource MutedTextBrush}"
+                                   TextAlignment="Right"
+                                   TextTrimming="CharacterEllipsis" />
+                    </DockPanel>
+
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  Padding="8,0,8,8">
+                        <ItemsControl x:Name="WeekItemsControl">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Rows="1" Columns="7" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Margin="4"
+                                            Background="#FAFBFC"
+                                            MinWidth="175">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <Border Grid.Row="0" Background="#EEF1F5" CornerRadius="6,6,0,0" Padding="8">
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Header}" FontWeight="SemiBold" FontSize="15" HorizontalAlignment="Center" />
+                                                    <TextBlock Text="{Binding SubHeader}" Foreground="{StaticResource MutedTextBrush}" HorizontalAlignment="Center" />
+                                                </StackPanel>
+                                            </Border>
+                                            <ListBox Grid.Row="1"
+                                                     ItemsSource="{Binding Programs}"
+                                                     Padding="7"
+                                                     BorderThickness="0"
+                                                     Background="Transparent"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                     ScrollViewer.CanContentScroll="True"
+                                                     ScrollViewer.IsDeferredScrollingEnabled="True"
+                                                     VirtualizingPanel.IsVirtualizing="True"
+                                                     VirtualizingPanel.VirtualizationMode="Recycling"
+                                                     VirtualizingPanel.ScrollUnit="Pixel"
+                                                     VirtualizingPanel.CacheLength="1"
+                                                     VirtualizingPanel.CacheLengthUnit="Page">
+                                                <ListBox.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <VirtualizingStackPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ListBox.ItemsPanel>
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="Padding" Value="0" />
+                                                        <Setter Property="Margin" Value="0" />
+                                                        <Setter Property="BorderThickness" Value="0" />
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                        <Setter Property="Focusable" Value="False" />
+                                                        <Setter Property="IsTabStop" Value="False" />
+                                                        <Style.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter Property="Background" Value="Transparent" />
+                                                            </Trigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                                <ListBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Style="{StaticResource ProgramButtonStyle}"
+                                                                Tag="{Binding}"
+                                                                Click="ProgramButton_Click">
+                                                            <StackPanel>
+                                                                <DockPanel LastChildFill="True">
+                                                                    <TextBlock Text="{Binding TimeText}" FontWeight="SemiBold" FontSize="12" DockPanel.Dock="Left" />
+                                                                    <Border Background="#F79009"
+                                                                            CornerRadius="8"
+                                                                            Padding="5,1"
+                                                                            HorizontalAlignment="Right"
+                                                                            Visibility="{Binding OnAirVisibility}">
+                                                                        <TextBlock Text="放送中" Foreground="White" FontSize="10" />
+                                                                    </Border>
+                                                                </DockPanel>
+                                                                <TextBlock Text="{Binding Program.Title}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                                                <TextBlock Text="{Binding Station.ShortName}" Foreground="{StaticResource AccentBrush}" FontSize="11" Margin="0,3,0,0" />
+                                                                <TextBlock Text="{Binding Program.Performers}" Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                                                <TextBlock Text="{Binding Program.Hashtag}" Foreground="{StaticResource MutedTextBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0" />
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </DataTemplate>
+                                                </ListBox.ItemTemplate>
+                                            </ListBox>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#D7DCE2" />
+
+            <Border Grid.Column="2" Margin="0,12,12,12" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Padding="14,12" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="SelectedProgramTitleTextBlock"
+                                       Text="番組を選択してください"
+                                       FontSize="19"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap" />
+                            <TextBlock x:Name="SelectedProgramMetaTextBlock"
+                                       Grid.Row="1"
+                                       Margin="0,5,0,0"
+                                       Foreground="{StaticResource MutedTextBrush}"
+                                       TextWrapping="Wrap" />
+                            <TextBlock x:Name="SelectedProgramDescriptionTextBlock"
+                                       Grid.Row="2"
+                                       Margin="0,7,0,0"
+                                       MaxHeight="74"
+                                       TextWrapping="Wrap"
+                                       TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1" Margin="10,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox x:Name="ReactionKeywordTextBox"
+                                 Grid.Row="0"
+                                 Grid.Column="0"
+                                 Height="32"
+                                 VerticalContentAlignment="Center"
+                                 ToolTip="Yahoo!リアルタイム検索で表示する検索語" />
+                        <Button Grid.Row="0"
+                                Grid.Column="1"
+                                Content="反響を表示"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Click="ShowReactionButton_Click" />
+
+                        <WrapPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,5,0,0">
+                            <Button Content="radikoで聴く" Click="OpenRadikoButton_Click" />
+                            <Button Content="番組公式サイト" Click="OpenProgramSiteButton_Click" />
+                            <Button Content="局公式番組表" Click="OpenStationScheduleButton_Click" />
+                            <Separator Width="10" Opacity="0" />
+                            <Button Content="←" Width="42" Click="BrowserBackButton_Click" />
+                            <Button Content="→" Width="42" Click="BrowserForwardButton_Click" />
+                            <Button Content="更新" Click="BrowserRefreshButton_Click" />
+                            <Button Content="外部ブラウザ" Click="OpenExternalBrowserButton_Click" />
+                        </WrapPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2">
+                        <wv2:WebView2 x:Name="ReactionWebView" />
+                        <Border x:Name="BrowserStatusBorder" Background="#F8FAFC" Padding="18" Visibility="Visible">
+                            <TextBlock x:Name="BrowserStatusTextBlock"
+                                       Text="番組を選択すると、Yahoo!リアルタイム検索を表示します。"
+                                       TextWrapping="Wrap"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StatusBar Grid.Row="2" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+            <StatusBarItem>
+                <TextBlock x:Name="StatusTextBlock" Text="準備中..." />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</Window>
