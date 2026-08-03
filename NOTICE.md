@@ -8,7 +8,7 @@ original RadioPulseViewer source code and the documentation added for this
 repository are released under the [MIT License](LICENSE), with:
 
 ```text
-Copyright (c) 2026 KK1234-dev
+Copyright (c) 2025 Keisuke Katahira
 ```
 
 The MIT License does **not** grant rights in third-party data, services,
