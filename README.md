@@ -18,10 +18,14 @@ RadioPulseViewer は、東京エリアのラジオ番組表を 7 日分取得し
 | 絞り込み | 放送局フィルター、番組名・出演者・ハッシュタグを対象にしたキーワード検索 |
 | 番組詳細 | 放送日時、出演者、ハッシュタグ、説明、放送中表示を選択番組ごとに表示 |
 | 反響確認 | 番組のハッシュタグ・検索語・タイトルを使い、Yahoo! JAPAN リアルタイム検索を WebView2 内に表示 |
+| 公開グラフ記録 | 公開ページで確認した件数を入力し、時系列グラフ表示とCSV保存。Webページの自動解析は行わない |
+| 公式X投稿数 | X API v2の投稿数エンドポイントから集計値だけを取得し、時系列表示とCSV保存 |
 | 外部リンク | radiko、番組公式サイト、放送局公式番組表、現在の検索ページを既定ブラウザーで開く |
 | オフライン補助 | 取得済み XML のキャッシュと `Data/programs.json` の初期データで取得失敗時を補助 |
 
-RadioPulseViewer 自体は音声を再生・録音・配信しません。「radikoで聴く」は radiko のページを外部ブラウザーで開く操作です。また、検索結果の抽出・集計・感情分析は行わず、Web ページをそのまま表示します。
+RadioPulseViewer 自体は音声を再生・録音・配信しません。「radikoで聴く」は radiko のページを外部ブラウザーで開く操作です。
+
+Yahoo! JAPANやXのWebページから検索結果やグラフ値を自動抽出しません。公開グラフ記録は、利用者が画面で確認した件数を入力する方式です。公式X投稿数は、利用者が用意したBearer Tokenを使って公式X APIだけを呼び出します。
 
 ## 処理の流れ
 
@@ -32,6 +36,8 @@ flowchart TD
     C --> D["7 日分の番組表を構築"]
     D --> E["放送局・キーワードで絞り込み"]
     E --> F["詳細とリアルタイム検索を表示"]
+    F --> H["公開グラフの値を手動記録"]
+    F --> I["公式X APIで投稿数を取得"]
     B -. "取得失敗" .-> G["XML キャッシュ / 初期データ"]
     G --> D
 ```
@@ -43,10 +49,14 @@ flowchart TD
 1. 上部の「放送局」と「番組検索」で表示対象を絞り込みます。
 2. 「前週」「今週」「次週」で対象週を移動し、「番組表更新」で再取得します。
 3. 週間番組表の番組カードを選択すると、右側に詳細とリアルタイム検索が表示されます。
-4. 詳細欄から radiko、番組公式サイト、局公式番組表を開けます。
-5. WebView2 の「←」「→」「更新」「外部ブラウザ」で検索ページを操作します。
+4. 「グラフ値を記録」では、公開グラフを参照して確認した件数を入力・保存します。
+5. 「公式X投稿数」では、設定済みの公式X APIから投稿数だけを取得します。
+6. 詳細欄から radiko、番組公式サイト、局公式番組表を開けます。
+7. WebView2 の「←」「→」「更新」「外部ブラウザ」で検索ページを操作します。
 
 放送局を選択して「選択局の公式番組表」を押すと、その局の番組表を外部ブラウザーで開きます。リンクは `http` / `https` のみを対象にしています。
+
+公開グラフ記録の詳細は [`docs/PUBLIC_GRAPH_RECORDING.md`](docs/PUBLIC_GRAPH_RECORDING.md)、公式X APIの設定は [`docs/X_API_SETUP.md`](docs/X_API_SETUP.md) を参照してください。
 
 ## 動作環境
 
@@ -100,6 +110,15 @@ Visual Studio では [`RadioPulseViewer.sln`](RadioPulseViewer.sln) を開き、
 
 ネットワーク取得に失敗し、古いキャッシュが存在する場合は、有効期限を過ぎていても最後に保存された XML を表示の補助に使います。番組表の正確性や更新時刻は画面の状態表示と提供元の公式情報で確認してください。
 
+### 反響データの保存先
+
+| データ | 保存先 |
+| --- | --- |
+| 公開グラフ記録 | `%LOCALAPPDATA%\RadioPulseViewer\PublicGraphRecords\public-graph-records.csv` |
+| 公式X投稿数 | `%LOCALAPPDATA%\RadioPulseViewer\XPostCounts\x-post-counts.csv` |
+
+公開グラフ記録はユーザーが転記した値です。公式X投稿数はX APIの集計値です。取得元と集計条件が異なるため、分析時は同じ指標として混在させないでください。
+
 ### 初期データ
 
 [`RadioPulseViewer/Data/programs.json`](RadioPulseViewer/Data/programs.json) は、取得開始前または取得失敗時に表示する参照データです。
@@ -152,8 +171,13 @@ JSON の主要構造は次のとおりです。
 | ファイル | 役割 |
 | --- | --- |
 | `MainWindow.xaml` / `.xaml.cs` | 週間番組表、絞り込み、選択詳細、WebView2、外部リンク操作 |
+| `MainWindow.XPostCounts.cs` | 公開グラフ記録・公式X投稿数画面への入口 |
+| `PublicGraphRecordWindow.xaml` / `.xaml.cs` | 公開グラフ値の入力、プレビュー、CSV保存 |
+| `XPostCountWindow.xaml` / `.xaml.cs` | 公式X APIの投稿数表示、CSV保存 |
 | `Services/RadikoScheduleService.cs` | 7 日分の取得、キャッシュ、radiko XML の解析 |
 | `Services/ProgramCatalogService.cs` | 初期 JSON の読み込みと最小限の整合性確認 |
+| `Services/PublicGraphRecordService.cs` | 手動入力値の検証とCSV保存 |
+| `Services/XPostCountService.cs` | 公式X APIの投稿数取得、キャッシュ、エラー処理 |
 | `Models/ProgramInfo.cs` | 番組情報、時刻、検索キーワードの優先順位 |
 | `Models/StationInfo.cs` | 放送局情報と表示名 |
 | `Models/ScheduleViewModels.cs` | 日別・番組カードの表示モデル |
@@ -166,9 +190,15 @@ JSON の主要構造は次のとおりです。
 ├─ Rebuild_Release_x64.bat
 ├─ LICENSE
 ├─ NOTICE.md
+├─ docs/
+│  ├─ PUBLIC_GRAPH_RECORDING.md
+│  └─ X_API_SETUP.md
 └─ RadioPulseViewer/
    ├─ App.xaml / App.xaml.cs
    ├─ MainWindow.xaml / MainWindow.xaml.cs
+   ├─ MainWindow.XPostCounts.cs
+   ├─ PublicGraphRecordWindow.xaml / .xaml.cs
+   ├─ XPostCountWindow.xaml / .xaml.cs
    ├─ RadioPulseViewer.csproj
    ├─ Data/programs.json
    ├─ Models/
@@ -181,7 +211,10 @@ JSON の主要構造は次のとおりです。
 > [!IMPORTANT]
 > WebView2 は実行時に `RadioPulseViewer.exe.WebView2` というユーザーデータフォルダーを EXE の近くへ作成することがあります。ここには閲覧履歴、Cookie、Local Storage、キャッシュなどが保存され得ます。アプリを配布・共有・アーカイブするときは、このフォルダーを絶対に含めないでください。
 
-- 本リポジトリに API キー、パスワード、Cookie、閲覧履歴は含まれません。
+- 本リポジトリに API キー、Bearer Token、パスワード、Cookie、閲覧履歴は含まれません。
+- Bearer TokenはWindowsの環境変数から読み込み、CSVやログへ保存しません。
+- 公開グラフ記録はWebページを自動解析せず、入力された件数だけを保存します。
+- CSVの文字列は、表計算ソフトで数式として解釈される先頭文字を無害化します。
 - WebView2 に表示されるページは外部コンテンツです。WebView2 Runtime を最新のサポート版に保ち、表示内容を信頼済みデータとして扱わないでください。
 - スケジュール XML キャッシュは `%LOCALAPPDATA%` に保存されます。不要になったキャッシュはアプリ終了後に削除できます。
 - 番組や放送局の URL は外部ブラウザーを起動します。`programs.json` を変更する場合はリンク先を確認してください。
@@ -189,11 +222,13 @@ JSON の主要構造は次のとおりです。
 
 ## 制約と運用上の注意
 
-- radiko や Yahoo! JAPAN の非公式クライアントであり、各社・各放送局との提携、承認、保証はありません。
-- 外部サービスの仕様、URL、利用条件、地域判定、配信内容が変わると、取得・表示できなくなる可能性があります。
+- radiko、Yahoo! JAPAN、Xや放送局の非公式クライアントであり、各社・各放送局との提携、承認、保証はありません。
+- 外部サービスの仕様、URL、利用条件、料金、地域判定、配信内容が変わると、取得・表示できなくなる可能性があります。
+- 公式X投稿数機能の利用には、利用時点で必要なDeveloper Account、App、Bearer Token、権限、APIクレジットが必要です。
+- 公開グラフ記録は自動取得ではないため、入力間違いが含まれる可能性があります。
 - 対象エリアはコード上で `JP13` に固定されています。地域を画面から変更する機能はありません。
 - 番組情報には提供元由来の HTML を除去して表示しますが、内容の正確性・完全性・最新性は保証しません。
-- 本リポジトリに自動テストはありません。公開準備時には JSON、XAML、プロジェクト参照の静的整合性を確認していますが、対象 Windows 環境での画面・通信・外部サービス結合テストは利用者側で実施してください。
+- 本リポジトリに自動テストはありません。GitHub ActionsでWindows / .NET 10 / Release x64のビルドを確認しますが、対象Windows環境での画面・通信・外部サービス結合テストは利用者側で実施してください。
 
 外部データ・サービス・依存ライブラリの権利と利用条件は [`NOTICE.md`](NOTICE.md) を参照し、利用時点の最新条件を確認してください。
 

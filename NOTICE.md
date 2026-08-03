@@ -39,20 +39,38 @@ repository.
 No WebView2 binaries or runtime files are committed to this repository; they
 are obtained separately during package restore or runtime installation.
 
+## X API
+
+The optional official Post-count feature calls X API v2 and requires credentials,
+permissions, credits, and pricing terms supplied by X Corp. The repository does
+not include a Bearer Token or grant X API access. Users must review the current
+X Developer Agreement, API documentation, and pricing before enabling the
+feature.
+
+- [X Developer Agreement and Policy](https://developer.x.com/en/developer-terms/agreement-and-policy)
+- [X API Post Counts](https://docs.x.com/x-api/posts/counts/introduction)
+- [X API Pricing](https://docs.x.com/x-api/getting-started/pricing)
+
+## Public graph recording
+
+The public graph recording feature does not automatically extract data from a
+web page. It opens a public search page for reference and stores only values
+that the user manually enters. The entered values remain subject to the source
+service's terms, accuracy, availability, and permitted-use conditions.
+
 ## External services and content
 
 RadioPulseViewer accesses or links to radiko, Yahoo! JAPAN real-time search,
-and broadcaster websites. Those services, their program information, and
-content displayed in WebView2 are governed by the respective providers' terms,
-privacy policies, availability, and technical specifications. They are not
-covered by the MIT License.
+X API, and broadcaster websites. Those services, their program information,
+and content displayed in WebView2 are governed by the respective providers'
+terms, privacy policies, availability, pricing, and technical specifications.
+They are not covered by the MIT License.
 
 - [radiko terms and policies](https://radiko.jp/rg/policy/dark-mode/)
 - [LY Corporation terms](https://www.lycorp.co.jp/ja/company/terms/)
 - [LY Corporation privacy policy](https://privacy.lycorp.co.jp/ja/)
 
 RadioPulseViewer and KK1234-dev are not affiliated with, sponsored by, or
-endorsed by Microsoft, radiko, LY Corporation, Yahoo! JAPAN, or any listed
-broadcaster. Company, service, station, and program names may be trademarks or
-other protected identifiers of their respective owners.
-
+endorsed by Microsoft, radiko, LY Corporation, Yahoo! JAPAN, X Corp., or any
+listed broadcaster. Company, service, station, and program names may be
+trademarks or other protected identifiers of their respective owners.
