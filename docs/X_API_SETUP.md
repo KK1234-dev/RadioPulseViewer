@@ -11,12 +11,20 @@ RadioPulseViewer の「公式X投稿数」は、X API v2 の `GET /2/tweets/coun
 - Bearer Tokenはソースコード、設定JSON、CSV、ログへ保存しません。
 - APIのレート制限や利用権限エラーを回避しません。
 
+## 利用料金
+
+X APIは従量課金方式です。`GET /2/tweets/counts/recent`も課金対象であり、利用前にDeveloper Consoleでクレジットと最新料金を確認する必要があります。
+
+この機能は任意です。X APIを利用しない場合は、別機能の「グラフ値を記録」で公開ページを参照し、画面で確認した件数だけを記録できます。
+
+- [X API Pricing](https://docs.x.com/x-api/getting-started/pricing)
+
 ## 必要なもの
 
 1. X Developer Platform のDeveloper Account
 2. ProjectとApp
 3. AppのBearer Token
-4. 利用時点で投稿数エンドポイントを利用できる契約・権限
+4. 利用時点で投稿数エンドポイントを利用できる契約・権限とAPIクレジット
 
 Xの仕様、利用条件、料金、提供範囲は変更される可能性があります。利用時点の公式ドキュメントとDeveloper Portalを確認してください。
 
@@ -74,7 +82,7 @@ setx RADIOPULSE_X_BEARER_TOKEN "YOUR_BEARER_TOKEN"
 ## エラー時
 
 - `401`: Bearer Tokenを確認します。
-- `403`: Appの権限または利用プランを確認します。
+- `403`: Appの権限、利用プラン、クレジットを確認します。
 - `429`: レート制限です。表示された時間まで待ちます。
 - その他: X APIの稼働状況と公式仕様を確認します。
 
