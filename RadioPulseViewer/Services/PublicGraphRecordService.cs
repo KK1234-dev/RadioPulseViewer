@@ -164,7 +164,7 @@ public sealed class PublicGraphRecordService
     private static string Escape(string value)
     {
         string safe = value;
-        if (!string.IsNullOrEmpty(safe) && "=+-@\t\r".Contains(safe[0], StringComparison.Ordinal))
+        if (!string.IsNullOrEmpty(safe) && "=+-@\t\r".IndexOf(safe[0]) >= 0)
         {
             safe = "'" + safe;
         }
