@@ -41,31 +41,30 @@ are obtained separately during package restore or runtime installation.
 
 ## X API
 
-The optional post-count analysis feature calls the official X API v2 recent
-Post counts endpoint. It does not scrape Yahoo! JAPAN or X web pages and does
-not retrieve Post text, user profiles, images, or video.
-
-Use of the X API, Developer Platform, Bearer Token, returned aggregate counts,
-and any related service is governed by X's current terms, developer agreement,
-policies, access plan, pricing, technical specifications, and rate limits.
-These may change independently of this repository.
+The optional official Post-count feature calls X API v2 and requires credentials,
+permissions, credits, and pricing terms supplied by X Corp. The repository does
+not include a Bearer Token or grant X API access. Users must review the current
+X Developer Agreement, API documentation, and pricing before enabling the
+feature.
 
 - [X Developer Agreement and Policy](https://developer.x.com/en/developer-terms/agreement-and-policy)
 - [X API Post Counts](https://docs.x.com/x-api/posts/counts/introduction)
-- [Get count of recent Posts](https://docs.x.com/x-api/posts/get-count-of-recent-posts)
+- [X API Pricing](https://docs.x.com/x-api/getting-started/pricing)
 
-No Bearer Token is included in the repository. Users must obtain their own
-credentials and confirm that their intended use is permitted. RadioPulseViewer
-does not bypass authentication, plan restrictions, rate limits, or other
-technical controls.
+## Public graph recording
+
+The public graph recording feature does not automatically extract data from a
+web page. It opens a public search page for reference and stores only values
+that the user manually enters. The entered values remain subject to the source
+service's terms, accuracy, availability, and permitted-use conditions.
 
 ## External services and content
 
 RadioPulseViewer accesses or links to radiko, Yahoo! JAPAN real-time search,
 X API, and broadcaster websites. Those services, their program information,
 and content displayed in WebView2 are governed by the respective providers'
-terms, privacy policies, availability, and technical specifications. They are
-not covered by the MIT License.
+terms, privacy policies, availability, pricing, and technical specifications.
+They are not covered by the MIT License.
 
 - [radiko terms and policies](https://radiko.jp/rg/policy/dark-mode/)
 - [LY Corporation terms](https://www.lycorp.co.jp/ja/company/terms/)
