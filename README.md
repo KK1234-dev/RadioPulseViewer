@@ -7,8 +7,6 @@
 
 RadioPulseViewer は、東京エリアのラジオ番組表を 7 日分取得し、放送局や番組名で絞り込みながら閲覧できる WPF アプリです。番組を選ぶと詳細情報と Yahoo! JAPAN リアルタイム検索を並べて表示し、radiko、番組公式サイト、放送局の番組表へ移動できます。
 
-本リポジトリは、ビルドに必要なソース、プロジェクト、初期データだけを収録した提出用構成です。ビルド済み EXE / DLL、NuGet 復元物、Visual Studio の個人設定、WebView2 の閲覧履歴・Cookie・キャッシュは含めていません。
-
 ## 主な機能
 
 | 領域 | 実装内容 |
@@ -18,7 +16,7 @@ RadioPulseViewer は、東京エリアのラジオ番組表を 7 日分取得し
 | 絞り込み | 放送局フィルター、番組名・出演者・ハッシュタグを対象にしたキーワード検索 |
 | 番組詳細 | 放送日時、出演者、ハッシュタグ、説明、放送中表示を選択番組ごとに表示 |
 | 反響確認 | 番組のハッシュタグ・検索語・タイトルを使い、Yahoo! JAPAN リアルタイム検索を WebView2 内に表示 |
-| 外部リンク | radiko、番組公式サイト、放送局公式番組表、現在の検索ページを既定ブラウザーで開く |
+| 関連ページ | radiko、番組公式サイト、現在の検索ページを既定ブラウザーで開き、放送局公式番組表を WebView2 に表示 |
 | オフライン補助 | 取得済み XML のキャッシュと `Data/programs.json` の初期データで取得失敗時を補助 |
 
 RadioPulseViewer 自体は音声を再生・録音・配信しません。「radikoで聴く」は radiko のページを外部ブラウザーで開く操作です。また、検索結果の抽出・集計・感情分析は行わず、Web ページをそのまま表示します。
@@ -46,7 +44,7 @@ flowchart TD
 4. 詳細欄から radiko、番組公式サイト、局公式番組表を開けます。
 5. WebView2 の「←」「→」「更新」「外部ブラウザ」で検索ページを操作します。
 
-放送局を選択して「選択局の公式番組表」を押すと、その局の番組表を外部ブラウザーで開きます。リンクは `http` / `https` のみを対象にしています。
+放送局を選択して「選択局の公式番組表」を押すと、その局の番組表をアプリ内の WebView2 に表示します。外部ブラウザー起動と WebView2 の遷移は `http` / `https` のみを対象にしています。
 
 ## 動作環境
 
@@ -83,6 +81,21 @@ dotnet build .\RadioPulseViewer\RadioPulseViewer.csproj -c Release -p:Platform=x
 
 Visual Studio では [`RadioPulseViewer.sln`](RadioPulseViewer.sln) を開き、構成 `Release`、プラットフォーム `x64` を選択してビルドできます。プロジェクトは `SelfContained=false` なので、配布先には対応する .NET Desktop Runtime が必要です。
 
+## 品質確認
+
+GitHub Actions の `CI` は、Windows 環境で .NET 10 の x64 Release ビルドを行い、Python 標準ライブラリによるリポジトリ検証も実行します。検証対象は次のとおりです。
+
+- 初期番組データの放送局参照、曜日、時刻、URL、重複キー
+- XAML とプロジェクト XML の構文
+- .NET 10 / WPF / WebView2 のプロジェクト設定
+- MIT License と `programs.json` のライセンス境界
+
+ローカルでは次のコマンドでリポジトリ検証を実行できます。
+
+```powershell
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
 ## データとキャッシュ
 
 ### 番組表取得
@@ -110,7 +123,7 @@ Visual Studio では [`RadioPulseViewer.sln`](RadioPulseViewer.sln) を開き、
 | 放送局 | 15 局 |
 | 初期番組 | 195 件、うち 10 局分 |
 
-残る 5 局（`RN1`、`RN2`、`IBS`、`JOAK`、`JOAK-FM`）は局情報のみで、初期番組を収録していません。通常はネットワーク取得した番組表が使われます。初期データは参考用であり、現在の編成、配信地域、聴取可否を保証するものではありません。
+初期番組は 10 局分を収録し、`RN1`、`RN2`、`IBS`、`JOAK`、`JOAK-FM` を含む 15 局分の放送局情報を保持しています。起動後は、対象週についてネットワーク取得した番組表へ更新します。
 
 JSON の主要構造は次のとおりです。
 
@@ -145,7 +158,7 @@ JSON の主要構造は次のとおりです。
 }
 ```
 
-`stationId` は `stations[].id` と一致させてください。時刻は `HH:mm` 形式を想定し、深夜番組のため `24:00` 以降の時刻も扱います。ローダーは URL や時刻の厳密なスキーマ検証を行わないため、このファイルは信頼できる編集者だけが変更し、リンク先と形式をレビューしてください。
+`stationId` は `stations[].id` と一致させてください。時刻は `HH:mm` 形式を想定し、深夜番組のため `24:00` 以降の時刻も扱います。収録データの参照整合性、時刻形式、URL スキームは `tests/test_repository.py` で確認します。
 
 ## 実装構成
 
@@ -166,6 +179,8 @@ JSON の主要構造は次のとおりです。
 ├─ Rebuild_Release_x64.bat
 ├─ LICENSE
 ├─ NOTICE.md
+├─ .github/workflows/ci.yml
+├─ tests/test_repository.py
 └─ RadioPulseViewer/
    ├─ App.xaml / App.xaml.cs
    ├─ MainWindow.xaml / MainWindow.xaml.cs
@@ -184,21 +199,23 @@ JSON の主要構造は次のとおりです。
 - 本リポジトリに API キー、パスワード、Cookie、閲覧履歴は含まれません。
 - WebView2 に表示されるページは外部コンテンツです。WebView2 Runtime を最新のサポート版に保ち、表示内容を信頼済みデータとして扱わないでください。
 - スケジュール XML キャッシュは `%LOCALAPPDATA%` に保存されます。不要になったキャッシュはアプリ終了後に削除できます。
-- 番組や放送局の URL は外部ブラウザーを起動します。`programs.json` を変更する場合はリンク先を確認してください。
+- radiko と番組公式 URL は外部ブラウザー、放送局公式番組表は WebView2 で開きます。`programs.json` を変更する場合はリンク先を確認してください。
 - リアルタイム検索の利用に伴う通信、Cookie、履歴は、Yahoo! JAPAN と WebView2 の設定・ポリシーに従います。
 
-## 制約と運用上の注意
+## 実装範囲と外部サービス
 
 - radiko や Yahoo! JAPAN の非公式クライアントであり、各社・各放送局との提携、承認、保証はありません。
 - 外部サービスの仕様、URL、利用条件、地域判定、配信内容が変わると、取得・表示できなくなる可能性があります。
 - 対象エリアはコード上で `JP13` に固定されています。地域を画面から変更する機能はありません。
 - 番組情報には提供元由来の HTML を除去して表示しますが、内容の正確性・完全性・最新性は保証しません。
-- 本リポジトリに自動テストはありません。公開準備時には JSON、XAML、プロジェクト参照の静的整合性を確認していますが、対象 Windows 環境での画面・通信・外部サービス結合テストは利用者側で実施してください。
-
 外部データ・サービス・依存ライブラリの権利と利用条件は [`NOTICE.md`](NOTICE.md) を参照し、利用時点の最新条件を確認してください。
 
 ## ライセンス
 
 RadioPulseViewer のオリジナルソースコードと本リポジトリに追加した文書は [MIT License](LICENSE) です。
+
+```text
+Copyright (c) 2026 Keisuke Katahira
+```
 
 `RadioPulseViewer/Data/programs.json` の番組・放送局データ、外部サービスのコンテンツ、Microsoft WebView2 などの依存コンポーネントには MIT License は適用されません。詳細は [`NOTICE.md`](NOTICE.md) を参照してください。

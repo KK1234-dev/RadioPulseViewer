@@ -17,6 +17,10 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <AssemblyName>RadioPulseViewer</AssemblyName>
     <RootNamespace>RadioPulseViewer</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>Keisuke Katahira</Authors>
+    <Copyright>Copyright (c) 2026 Keisuke Katahira</Copyright>
+    <Description>Weekly radio schedule and real-time reaction viewer for Windows.</Description>
 
     <!-- 出力先を bin\Debug / bin\Release 配下へ統一 -->
     <OutputPath>bin\$(Configuration)\</OutputPath>

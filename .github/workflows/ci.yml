@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  repository-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate repository
+        run: python -m unittest discover -s tests -p "test_*.py" -v
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore .\RadioPulseViewer\RadioPulseViewer.csproj
+
+      - name: Build x64 Release
+        run: dotnet build .\RadioPulseViewer\RadioPulseViewer.csproj -c Release -p:Platform=x64 -p:ContinuousIntegrationBuild=true --no-restore
+
+      - name: Upload application
+        uses: actions/upload-artifact@v4
+        with:
+          name: RadioPulseViewer-x64-Release
+          path: |
+            RadioPulseViewer/bin/Release/net10.0-windows/
+            LICENSE
+            NOTICE.md
+          if-no-files-found: error
