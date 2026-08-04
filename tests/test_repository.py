@@ -100,6 +100,7 @@ class RepositoryTests(unittest.TestCase):
         version = project.findtext(".//Version")
         authors = project.findtext(".//Authors")
         copyright_text = project.findtext(".//Copyright")
+        release_properties = project.find(".//PropertyGroup[@Condition=\"'$(Configuration)' == 'Release'\"]")
         package = project.find(".//PackageReference[@Include='Microsoft.Web.WebView2']")
 
         self.assertEqual("net10.0-windows", target_framework)
@@ -107,6 +108,9 @@ class RepositoryTests(unittest.TestCase):
         self.assertEqual("1.0.0", version)
         self.assertEqual("Keisuke Katahira", authors)
         self.assertEqual("Copyright (c) 2026 Keisuke Katahira", copyright_text)
+        self.assertIsNotNone(release_properties)
+        self.assertEqual("none", release_properties.findtext("DebugType"))
+        self.assertEqual("false", release_properties.findtext("DebugSymbols"))
         self.assertIsNotNone(package)
         self.assertRegex(package.attrib["Version"], r"^\d+\.\d+\.\d+\.\d+$")
 

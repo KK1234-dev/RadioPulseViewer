@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -345,7 +346,7 @@ public partial class MainWindow : Window
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (!stationsById.TryGetValue(program.StationId, out StationInfo station))
+            if (!stationsById.TryGetValue(program.StationId, out StationInfo? station) || station is null)
             {
                 continue;
             }
@@ -504,7 +505,7 @@ public partial class MainWindow : Window
         ReactionWebView.Source = new Uri(targetUrl, UriKind.Absolute);
     }
 
-    private static bool TryValidateWebUrl(string url, out Uri? uri)
+    private static bool TryValidateWebUrl(string url, [NotNullWhen(true)] out Uri? uri)
     {
         if (Uri.TryCreate(url, UriKind.Absolute, out uri) &&
             (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp))

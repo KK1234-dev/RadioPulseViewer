@@ -39,7 +39,15 @@ jobs:
         run: dotnet restore .\RadioPulseViewer\RadioPulseViewer.csproj
 
       - name: Build x64 Release
-        run: dotnet build .\RadioPulseViewer\RadioPulseViewer.csproj -c Release -p:Platform=x64 -p:ContinuousIntegrationBuild=true --no-restore
+        run: dotnet build .\RadioPulseViewer\RadioPulseViewer.csproj -c Release -p:Platform=x64 -p:ContinuousIntegrationBuild=true -p:DebugType=None -p:DebugSymbols=false --no-restore
+
+      - name: Verify application package
+        shell: pwsh
+        run: |
+          $projectPdb = ".\RadioPulseViewer\bin\Release\net10.0-windows\RadioPulseViewer.pdb"
+          if (Test-Path $projectPdb) {
+            throw "Project debug symbols must not be included in the release artifact: $projectPdb"
+          }
 
       - name: Upload application
         uses: actions/upload-artifact@v4
