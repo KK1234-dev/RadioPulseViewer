@@ -1,6 +1,10 @@
 <h1 align="center">RadioPulseViewer</h1>
 
 <p align="center">
+  <a href="https://github.com/KK1234-dev/RadioPulseViewer/actions/workflows/ci.yml"><img src="https://github.com/KK1234-dev/RadioPulseViewer/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
+
+<p align="center">
   週間ラジオ番組表と番組への反響を、1 つの画面で確認する Windows デスクトップアプリ<br>
   C# / WPF / .NET 10 / WebView2 / Windows x64
 </p>
