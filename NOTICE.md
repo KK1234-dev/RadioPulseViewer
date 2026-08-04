@@ -2,13 +2,11 @@
 
 ## Repository license
 
-The source archive from which this repository was prepared did not contain a
-license or copyright notice. At the repository publisher's direction, the
-original RadioPulseViewer source code and the documentation added for this
-repository are released under the [MIT License](LICENSE), with:
+The original RadioPulseViewer source code and the documentation created for
+this project are released under the [MIT License](LICENSE), with:
 
 ```text
-Copyright (c) 2025 Keisuke Katahira
+Copyright (c) 2026 Keisuke Katahira
 ```
 
 The MIT License does **not** grant rights in third-party data, services,
@@ -18,12 +16,10 @@ software, names, logos, or other material described below.
 
 [`RadioPulseViewer/Data/programs.json`](RadioPulseViewer/Data/programs.json)
 contains station names, program metadata, descriptions, hashtags, and links
-associated with broadcasters and external services. That file is distributed
-as reference/fallback data and is excluded from the MIT License. Rights in its
-contents remain with their respective rightsholders. The original archive did
-not include evidence establishing a separate redistribution license for this
-data; users are responsible for confirming that their intended use is
-permitted and for replacing or removing the data when necessary.
+associated with broadcasters and external services. The file is included as
+reference/fallback data and is excluded from the MIT License. Rights in its
+contents remain with their respective rightsholders, and its use is subject to
+the applicable providers' terms.
 
 ## Microsoft WebView2
 
@@ -55,4 +51,3 @@ RadioPulseViewer and KK1234-dev are not affiliated with, sponsored by, or
 endorsed by Microsoft, radiko, LY Corporation, Yahoo! JAPAN, or any listed
 broadcaster. Company, service, station, and program names may be trademarks or
 other protected identifiers of their respective owners.
-

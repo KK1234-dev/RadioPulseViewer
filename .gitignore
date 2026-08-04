@@ -20,4 +20,5 @@ arm64/
 # Test and diagnostic output
 TestResults/
 *.log
-
+__pycache__/
+*.py[cod]
